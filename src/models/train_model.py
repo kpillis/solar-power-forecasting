@@ -1,11 +1,8 @@
 from xgboost import XGBRegressor
-from sklearn.svm import LinearSVR
-import pickle
-def train(X,y,boosting):
-    if boosting :
-        model = XGBRegressor()
+def train(X,y,linear=False):
+    if linear :
+        model = XGBRegressor(booster="gblinear")
     else:
-        model = LinearSVR()
+        model = XGBRegressor()
     model.fit(X,y)
-    pickle.dump(model, open("../../models/model.py","wb"))
     return model
