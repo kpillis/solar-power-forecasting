@@ -5,7 +5,7 @@ Created on Wed Oct 17 11:29:18 2018
 @author: pillis.krisztian
 """
 
-def prepare(df, predict_interval, rolling_intervals):
+def prepare(df):
     
     INDEX_COLUMN = 'TIMESTAMP'
 
@@ -45,6 +45,16 @@ def add_rolling(df,columns, intervals, shift):
                 df["ROLLING_VAR_"+column+"_"+str(i)] = rolling_column.var().shift(shift)
                 df["ROLLING_SKEW_"+column+"_"+str(i)] = rolling_column.skew().shift(shift)
                 df["ROLLING_KURT_"+column+"_"+str(i)] = rolling_column.kurt().shift(shift)
+                expanding_column = df[column].expanding()
+                df["expanding_MEAN_"+column+"_"+str(i)] = expanding_column.mean().shift(shift)
+                df["expanding_MIN_"+column+"_"+str(i)] = expanding_column.min().shift(shift)
+                df["expanding_MAX_"+column+"_"+str(i)] = expanding_column.max().shift(shift)
+                df["expanding_SUM_"+column+"_"+str(i)] = expanding_column.sum().shift(shift)
+                df["expanding_MEDIAN_"+column+"_"+str(i)] = expanding_column.median().shift(shift)
+                df["expanding_STD_"+column+"_"+str(i)] = expanding_column.std().shift(shift)
+                df["expanding_VAR_"+column+"_"+str(i)] = expanding_column.var().shift(shift)
+                df["expanding_SKEW_"+column+"_"+str(i)] = expanding_column.skew().shift(shift)
+                df["expanding_KURT_"+column+"_"+str(i)] = expanding_column.kurt().shift(shift)
     return df
 
 def dissipate_features(df, columns):
