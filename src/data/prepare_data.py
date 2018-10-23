@@ -8,9 +8,10 @@ Created on Wed Oct 17 11:29:18 2018
 def prepare(df):
     
     INDEX_COLUMN = 'TIMESTAMP'
-
     
-    
+    DATE_FORMAT = '%Y%m%d %H:%M'
+    dateparse = lambda x: pd.datetime.strptime(x, DATE_FORMAT)
+    df[INDEX_COLUMN] = df[INDEX_COLUMN].apply(dateparse)
     
     df["ZONE_1"] = df["ZONEID"].apply(lambda x: x == 1)
     df["ZONE_2"] = df["ZONEID"].apply(lambda x: x == 2)
@@ -20,7 +21,7 @@ def prepare(df):
     
     df["MONTH"] = df[INDEX_COLUMN].apply(lambda x: x.month)
     df["HOUR"] = df[INDEX_COLUMN].apply(lambda x: x.hour)
-    df = df.drop("TIMESTAMP",axis=1)
+    df = df.drop(INDEX_COLUMN,axis=1)
     #df = df.set_index("TIMESTAMP")
     
     return df
