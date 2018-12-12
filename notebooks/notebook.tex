@@ -141,7 +141,7 @@
     \def\gt{>}
     \def\lt{<}
     % Document parameters
-    \title{Exploratory Data Analysis}
+    \title{solar\_power\_forecasting}
     
     
     
@@ -280,16 +280,22 @@
     
 
     
-    \section{Felderítő adatelemzés}\label{felderuxedtux151-adatelemzuxe9s}
+    \section{Napelem termelés
+előrejelzés}\label{napelem-termeluxe9s-elux151rejelzuxe9s}
 
     \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor}1}]:} \PY{k+kn}{from} \PY{n+nn}{src}\PY{n+nn}{.}\PY{n+nn}{data} \PY{k}{import} \PY{n}{read\PYZus{}data}\PY{p}{,}\PY{n}{prepare\PYZus{}data}
-        \PY{k+kn}{from} \PY{n+nn}{src}\PY{n+nn}{.}\PY{n+nn}{models} \PY{k}{import} \PY{n}{train\PYZus{}model}\PY{p}{,}\PY{n}{predict\PYZus{}model}
-        \PY{k+kn}{import} \PY{n+nn}{pandas} \PY{k}{as} \PY{n+nn}{pd}
+{\color{incolor}In [{\color{incolor}1}]:} \PY{k+kn}{import} \PY{n+nn}{pandas} \PY{k}{as} \PY{n+nn}{pd}
+        \PY{k+kn}{import} \PY{n+nn}{matplotlib}\PY{n+nn}{.}\PY{n+nn}{pyplot} \PY{k}{as} \PY{n+nn}{plt}
         \PY{k+kn}{from} \PY{n+nn}{pandas}\PY{n+nn}{.}\PY{n+nn}{plotting} \PY{k}{import} \PY{n}{lag\PYZus{}plot}
         \PY{k+kn}{from} \PY{n+nn}{pandas}\PY{n+nn}{.}\PY{n+nn}{plotting} \PY{k}{import} \PY{n}{autocorrelation\PYZus{}plot}
         \PY{k+kn}{import} \PY{n+nn}{matplotlib}\PY{n+nn}{.}\PY{n+nn}{pyplot} \PY{k}{as} \PY{n+nn}{plt}
         \PY{k+kn}{import} \PY{n+nn}{seaborn} \PY{k}{as} \PY{n+nn}{sns}
+        \PY{k+kn}{from} \PY{n+nn}{statsmodels}\PY{n+nn}{.}\PY{n+nn}{tsa}\PY{n+nn}{.}\PY{n+nn}{seasonal} \PY{k}{import} \PY{n}{seasonal\PYZus{}decompose}
+        \PY{k+kn}{from} \PY{n+nn}{sklearn}\PY{n+nn}{.}\PY{n+nn}{metrics} \PY{k}{import} \PY{n}{mean\PYZus{}squared\PYZus{}error}\PY{p}{,}\PY{n}{explained\PYZus{}variance\PYZus{}score}
+        \PY{k+kn}{from} \PY{n+nn}{xgboost} \PY{k}{import} \PY{n}{XGBRegressor}
+        \PY{k+kn}{from} \PY{n+nn}{sklearn}\PY{n+nn}{.}\PY{n+nn}{linear\PYZus{}model} \PY{k}{import} \PY{n}{Lasso}\PY{p}{,}\PY{n}{ElasticNet}\PY{p}{,}\PY{n}{Ridge}\PY{p}{,}\PY{n}{LinearRegression}
+        \PY{k+kn}{from} \PY{n+nn}{sklearn}\PY{n+nn}{.}\PY{n+nn}{svm} \PY{k}{import} \PY{n}{SVR}\PY{p}{,}\PY{n}{LinearSVR}
+        
         \PY{n}{pd}\PY{o}{.}\PY{n}{options}\PY{o}{.}\PY{n}{mode}\PY{o}{.}\PY{n}{chained\PYZus{}assignment} \PY{o}{=} \PY{k+kc}{None}
         \PY{o}{\PYZpc{}}\PY{k}{matplotlib} inline
 \end{Verbatim}
@@ -458,7 +464,7 @@ Index(['ZONEID', 'TIMESTAMP', 'POWER', 'LIQUID\_WATER', 'ICE\_WATER',
 
 
 \begin{Verbatim}[commandchars=\\\{\}]
-{\color{outcolor}Out[{\color{outcolor}9}]:} <seaborn.axisgrid.FacetGrid at 0xc4a48c0b38>
+{\color{outcolor}Out[{\color{outcolor}9}]:} <seaborn.axisgrid.FacetGrid at 0x723c0f5748>
 \end{Verbatim}
             
     \begin{center}
@@ -483,8 +489,6 @@ jobban látszon a célváltozó időbeli változása.
 
     \begin{Verbatim}[commandchars=\\\{\}]
 {\color{incolor}In [{\color{incolor}11}]:} \PY{n}{df} \PY{o}{=} \PY{n}{df}\PY{o}{.}\PY{n}{set\PYZus{}index}\PY{p}{(}\PY{n}{INDEX\PYZus{}COLUMN}\PY{p}{)}
-         \PY{c+c1}{\PYZsh{} df[\PYZdq{}MONTH\PYZdq{}] = df.index.to\PYZus{}series().apply(lambda x: x.month)}
-         \PY{c+c1}{\PYZsh{} df[\PYZdq{}HOUR\PYZdq{}] = df.index.to\PYZus{}series().apply(lambda x: x.hour)}
 \end{Verbatim}
 
 
@@ -510,7 +514,7 @@ az látszik, hogy van egy napi szintű szezonalitása a célváltozónak
 
 
 \begin{Verbatim}[commandchars=\\\{\}]
-{\color{outcolor}Out[{\color{outcolor}13}]:} <matplotlib.axes.\_subplots.AxesSubplot at 0xc4a3d98c50>
+{\color{outcolor}Out[{\color{outcolor}13}]:} <matplotlib.axes.\_subplots.AxesSubplot at 0x723c129ac8>
 \end{Verbatim}
             
     \begin{center}
@@ -538,7 +542,7 @@ az látszik, hogy van egy napi szintű szezonalitása a célváltozónak
 
 
 \begin{Verbatim}[commandchars=\\\{\}]
-{\color{outcolor}Out[{\color{outcolor}14}]:} <matplotlib.axes.\_subplots.AxesSubplot at 0xc4a5b895f8>
+{\color{outcolor}Out[{\color{outcolor}14}]:} <matplotlib.axes.\_subplots.AxesSubplot at 0x723ce09128>
 \end{Verbatim}
             
     \begin{center}
@@ -577,7 +581,7 @@ felbontásokra.
 
 
 \begin{Verbatim}[commandchars=\\\{\}]
-{\color{outcolor}Out[{\color{outcolor}15}]:} <matplotlib.axes.\_subplots.AxesSubplot at 0xc4a699cd30>
+{\color{outcolor}Out[{\color{outcolor}15}]:} <matplotlib.axes.\_subplots.AxesSubplot at 0x723d605828>
 \end{Verbatim}
             
     \begin{center}
@@ -591,8 +595,7 @@ felbontásokra.
 adat.
 
     \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor}16}]:} \PY{k+kn}{from} \PY{n+nn}{statsmodels}\PY{n+nn}{.}\PY{n+nn}{tsa}\PY{n+nn}{.}\PY{n+nn}{seasonal} \PY{k}{import} \PY{n}{seasonal\PYZus{}decompose}
-         \PY{n}{decomposition} \PY{o}{=} \PY{n}{seasonal\PYZus{}decompose}\PY{p}{(}\PY{n}{power\PYZus{}by\PYZus{}month}\PY{o}{.}\PY{n}{sum}\PY{p}{(}\PY{p}{)}\PY{o}{.}\PY{n}{POWER}\PY{p}{)}
+{\color{incolor}In [{\color{incolor}16}]:} \PY{n}{decomposition} \PY{o}{=} \PY{n}{seasonal\PYZus{}decompose}\PY{p}{(}\PY{n}{power\PYZus{}by\PYZus{}month}\PY{o}{.}\PY{n}{sum}\PY{p}{(}\PY{p}{)}\PY{o}{.}\PY{n}{POWER}\PY{p}{)}
          \PY{n}{trend} \PY{o}{=} \PY{n}{decomposition}\PY{o}{.}\PY{n}{trend}
          \PY{n}{seasonality} \PY{o}{=} \PY{n}{decomposition}\PY{o}{.}\PY{n}{seasonal}
          \PY{n}{residual} \PY{o}{=} \PY{n}{decomposition}\PY{o}{.}\PY{n}{resid}
@@ -632,7 +635,7 @@ adat.
 
 
 \begin{Verbatim}[commandchars=\\\{\}]
-{\color{outcolor}Out[{\color{outcolor}16}]:} <matplotlib.axes.\_subplots.AxesSubplot at 0xc4a84f3710>
+{\color{outcolor}Out[{\color{outcolor}16}]:} <matplotlib.axes.\_subplots.AxesSubplot at 0x723fc0f710>
 \end{Verbatim}
             
     \begin{center}
@@ -682,7 +685,7 @@ beli értékei között.
 
 
 \begin{Verbatim}[commandchars=\\\{\}]
-{\color{outcolor}Out[{\color{outcolor}17}]:} <matplotlib.axes.\_subplots.AxesSubplot at 0xc4a962a2b0>
+{\color{outcolor}Out[{\color{outcolor}17}]:} <matplotlib.axes.\_subplots.AxesSubplot at 0x7240d3e668>
 \end{Verbatim}
             
     \begin{center}
@@ -708,7 +711,7 @@ kapcsolat, ami 2 napot jelent.
 
 
 \begin{Verbatim}[commandchars=\\\{\}]
-{\color{outcolor}Out[{\color{outcolor}18}]:} <matplotlib.axes.\_subplots.AxesSubplot at 0xc4a82bda90>
+{\color{outcolor}Out[{\color{outcolor}18}]:} <matplotlib.axes.\_subplots.AxesSubplot at 0x723f7f8c50>
 \end{Verbatim}
             
     \begin{center}
@@ -728,7 +731,7 @@ kapcsolat.
 
 
 \begin{Verbatim}[commandchars=\\\{\}]
-{\color{outcolor}Out[{\color{outcolor}19}]:} <matplotlib.axes.\_subplots.AxesSubplot at 0xc4a84259b0>
+{\color{outcolor}Out[{\color{outcolor}19}]:} <matplotlib.axes.\_subplots.AxesSubplot at 0x723f89a2b0>
 \end{Verbatim}
             
     \begin{center}
@@ -748,19 +751,19 @@ változók.
 
 
 \begin{Verbatim}[commandchars=\\\{\}]
-{\color{outcolor}Out[{\color{outcolor}20}]:} array([<matplotlib.axes.\_subplots.AxesSubplot object at 0x000000C4A801B240>,
-                <matplotlib.axes.\_subplots.AxesSubplot object at 0x000000C4A82FDA58>,
-                <matplotlib.axes.\_subplots.AxesSubplot object at 0x000000C4A828A0F0>,
-                <matplotlib.axes.\_subplots.AxesSubplot object at 0x000000C4A8288588>,
-                <matplotlib.axes.\_subplots.AxesSubplot object at 0x000000C4A834FB00>,
-                <matplotlib.axes.\_subplots.AxesSubplot object at 0x000000C4A834FB38>,
-                <matplotlib.axes.\_subplots.AxesSubplot object at 0x000000C4A9804630>,
-                <matplotlib.axes.\_subplots.AxesSubplot object at 0x000000C4A982BBA8>,
-                <matplotlib.axes.\_subplots.AxesSubplot object at 0x000000C4A985E160>,
-                <matplotlib.axes.\_subplots.AxesSubplot object at 0x000000C4A9A856D8>,
-                <matplotlib.axes.\_subplots.AxesSubplot object at 0x000000C4A9AB1C50>,
-                <matplotlib.axes.\_subplots.AxesSubplot object at 0x000000C4A9AE1208>,
-                <matplotlib.axes.\_subplots.AxesSubplot object at 0x000000C4A9B0B780>],
+{\color{outcolor}Out[{\color{outcolor}20}]:} array([<matplotlib.axes.\_subplots.AxesSubplot object at 0x000000723FAB95C0>,
+                <matplotlib.axes.\_subplots.AxesSubplot object at 0x000000723FB04358>,
+                <matplotlib.axes.\_subplots.AxesSubplot object at 0x000000723F7B18D0>,
+                <matplotlib.axes.\_subplots.AxesSubplot object at 0x000000723F818E48>,
+                <matplotlib.axes.\_subplots.AxesSubplot object at 0x000000723FA64DD8>,
+                <matplotlib.axes.\_subplots.AxesSubplot object at 0x000000723FA64EB8>,
+                <matplotlib.axes.\_subplots.AxesSubplot object at 0x0000007240DD9EF0>,
+                <matplotlib.axes.\_subplots.AxesSubplot object at 0x0000007240E094A8>,
+                <matplotlib.axes.\_subplots.AxesSubplot object at 0x0000007240E33A20>,
+                <matplotlib.axes.\_subplots.AxesSubplot object at 0x0000007240E5BF98>,
+                <matplotlib.axes.\_subplots.AxesSubplot object at 0x0000007240E8C550>,
+                <matplotlib.axes.\_subplots.AxesSubplot object at 0x0000007240EB4AC8>,
+                <matplotlib.axes.\_subplots.AxesSubplot object at 0x0000007240EE5080>],
                dtype=object)
 \end{Verbatim}
             
@@ -781,16 +784,20 @@ változik, ez azért van, mert ezek akkumlált mezők.
 
     \begin{Verbatim}[commandchars=\\\{\}]
 {\color{incolor}In [{\color{incolor}21}]:} \PY{n}{accumlated\PYZus{}columns} \PY{o}{=} \PY{p}{[}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{SOLAR\PYZus{}RAD}\PY{l+s+s2}{\PYZdq{}}\PY{p}{,}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{TERMAL\PYZus{}RAD}\PY{l+s+s2}{\PYZdq{}}\PY{p}{,}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{TOP\PYZus{}NET\PYZus{}SOLAR\PYZus{}RAD}\PY{l+s+s2}{\PYZdq{}}\PY{p}{,}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{TOTAL\PYZus{}PRECIPATION}\PY{l+s+s2}{\PYZdq{}}\PY{p}{]}
-         \PY{n}{df} \PY{o}{=} \PY{n}{prepare\PYZus{}data}\PY{o}{.}\PY{n}{dissipate\PYZus{}features}\PY{p}{(}\PY{n}{df}\PY{o}{=}\PY{n}{df}\PY{p}{,} \PY{n}{columns}\PY{o}{=}\PY{n}{accumlated\PYZus{}columns}\PY{p}{)}
+         \PY{k}{def} \PY{n+nf}{dissipate\PYZus{}features}\PY{p}{(}\PY{n}{df}\PY{p}{,} \PY{n}{columns}\PY{p}{)}\PY{p}{:}
+             \PY{k}{for} \PY{n}{column} \PY{o+ow}{in} \PY{n}{columns}\PY{p}{:}
+                 \PY{n}{df}\PY{p}{[}\PY{n}{column}\PY{p}{]} \PY{o}{=} \PY{n}{df}\PY{p}{[}\PY{n}{column}\PY{p}{]}\PY{o}{.}\PY{n}{rolling}\PY{p}{(}\PY{n}{window}\PY{o}{=}\PY{l+m+mi}{2}\PY{p}{)}\PY{o}{.}\PY{n}{apply}\PY{p}{(}\PY{k}{lambda} \PY{n}{x}\PY{p}{:} \PY{n}{x}\PY{p}{[}\PY{l+m+mi}{1}\PY{p}{]} \PY{k}{if} \PY{n}{x}\PY{p}{[}\PY{l+m+mi}{1}\PY{p}{]} \PY{o}{\PYZhy{}} \PY{n}{x}\PY{p}{[}\PY{l+m+mi}{0}\PY{p}{]} \PY{o}{\PYZlt{}} \PY{l+m+mi}{0} \PY{k}{else} \PY{n}{x}\PY{p}{[}\PY{l+m+mi}{1}\PY{p}{]} \PY{o}{\PYZhy{}} \PY{n}{x}\PY{p}{[}\PY{l+m+mi}{0}\PY{p}{]}\PY{p}{,} \PY{n}{raw}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{True}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+             \PY{k}{return} \PY{n}{df}
+         \PY{n}{df} \PY{o}{=} \PY{n}{dissipate\PYZus{}features}\PY{p}{(}\PY{n}{df}\PY{o}{=}\PY{n}{df}\PY{p}{,} \PY{n}{columns}\PY{o}{=}\PY{n}{accumlated\PYZus{}columns}\PY{p}{)}
          \PY{n}{df}\PY{p}{[}\PY{p}{:}\PY{n}{ONE\PYZus{}WEEK}\PY{o}{*}\PY{l+m+mi}{2}\PY{p}{]}\PY{p}{[}\PY{n}{accumlated\PYZus{}columns}\PY{p}{]}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{n}{subplots}\PY{o}{=}\PY{k+kc}{True}\PY{p}{,}\PY{n}{figsize}\PY{o}{=}\PY{p}{(}\PY{l+m+mi}{20}\PY{p}{,}\PY{l+m+mi}{10}\PY{p}{)}\PY{p}{)}
 \end{Verbatim}
 
 
 \begin{Verbatim}[commandchars=\\\{\}]
-{\color{outcolor}Out[{\color{outcolor}21}]:} array([<matplotlib.axes.\_subplots.AxesSubplot object at 0x000000C4A9E3D0B8>,
-                <matplotlib.axes.\_subplots.AxesSubplot object at 0x000000C4AA9D65F8>,
-                <matplotlib.axes.\_subplots.AxesSubplot object at 0x000000C4AA14AB70>,
-                <matplotlib.axes.\_subplots.AxesSubplot object at 0x000000C4AA17E128>],
+{\color{outcolor}Out[{\color{outcolor}21}]:} array([<matplotlib.axes.\_subplots.AxesSubplot object at 0x00000072420AEC88>,
+                <matplotlib.axes.\_subplots.AxesSubplot object at 0x00000072420EFBA8>,
+                <matplotlib.axes.\_subplots.AxesSubplot object at 0x000000724186B160>,
+                <matplotlib.axes.\_subplots.AxesSubplot object at 0x00000072418956D8>],
                dtype=object)
 \end{Verbatim}
             
@@ -800,32 +807,29 @@ változik, ez azért van, mert ezek akkumlált mezők.
     { \hspace*{\fill} \\}
     
     \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor}22}]:} \PY{k+kn}{import} \PY{n+nn}{pandas} \PY{k}{as} \PY{n+nn}{pd}
-         \PY{k+kn}{import} \PY{n+nn}{matplotlib}\PY{n+nn}{.}\PY{n+nn}{pyplot} \PY{k}{as} \PY{n+nn}{plt}
-         
-         \PY{k}{def} \PY{n+nf}{plot\PYZus{}scatters}\PY{p}{(}\PY{n}{df}\PY{p}{,} \PY{n}{target\PYZus{}column}\PY{p}{)}\PY{p}{:}
-             \PY{n}{number\PYZus{}of\PYZus{}columns} \PY{o}{=} \PY{n+nb}{len}\PY{p}{(}\PY{n}{df}\PY{o}{.}\PY{n}{columns}\PY{o}{.}\PY{n}{values}\PY{p}{)}
-             \PY{n}{plot\PYZus{}columns} \PY{o}{=} \PY{l+m+mi}{5}
-             \PY{n}{whole\PYZus{}rows} \PY{o}{=} \PY{n+nb}{int}\PY{p}{(}\PY{n}{number\PYZus{}of\PYZus{}columns} \PY{o}{/} \PY{n}{plot\PYZus{}columns}\PY{p}{)}
-             \PY{n}{extrarow} \PY{o}{=} \PY{l+m+mi}{1} \PY{k}{if} \PY{n}{number\PYZus{}of\PYZus{}columns} \PY{o}{\PYZpc{}} \PY{n}{plot\PYZus{}columns} \PY{o}{\PYZgt{}} \PY{l+m+mi}{0} \PY{k}{else} \PY{l+m+mi}{0}
-         
-             \PY{n}{row} \PY{o}{=} \PY{o}{\PYZhy{}}\PY{l+m+mi}{1}
-             \PY{n}{column} \PY{o}{=} \PY{l+m+mi}{0}
-             \PY{k}{for} \PY{n}{i}\PY{p}{,} \PY{n}{col} \PY{o+ow}{in} \PY{n+nb}{enumerate}\PY{p}{(}\PY{n}{df}\PY{o}{.}\PY{n}{columns}\PY{o}{.}\PY{n}{values}\PY{p}{)}\PY{p}{:}
-         
-                 \PY{n}{last\PYZus{}number\PYZus{}of\PYZus{}columns} \PY{o}{=} \PY{n}{number\PYZus{}of\PYZus{}columns}\PY{o}{\PYZpc{}}\PY{k}{plot\PYZus{}columns}
-                 \PY{n}{is\PYZus{}last\PYZus{}row} \PY{o}{=} \PY{n+nb}{int}\PY{p}{(}\PY{n}{number\PYZus{}of\PYZus{}columns}\PY{o}{/}\PY{n}{plot\PYZus{}columns}\PY{p}{)}\PY{o}{*}\PY{n}{plot\PYZus{}columns} \PY{o}{\PYZlt{}}\PY{o}{=} \PY{n}{i}
-         
-                 \PY{k}{if}\PY{p}{(}\PY{n}{i}\PY{o}{\PYZpc{}}\PY{k}{plot\PYZus{}columns} == 0):
-                     \PY{n}{row} \PY{o}{+}\PY{o}{=} \PY{l+m+mi}{1}
-                     \PY{n}{column} \PY{o}{=} \PY{l+m+mi}{0}
-                     \PY{k}{if} \PY{n}{is\PYZus{}last\PYZus{}row}\PY{p}{:}
-                         \PY{n}{fig}\PY{p}{,} \PY{n}{ax} \PY{o}{=} \PY{n}{plt}\PY{o}{.}\PY{n}{subplots}\PY{p}{(}\PY{l+m+mi}{1}\PY{p}{,}\PY{n}{last\PYZus{}number\PYZus{}of\PYZus{}columns}\PY{p}{,}\PY{n}{figsize}\PY{o}{=}\PY{p}{(}\PY{l+m+mi}{20}\PY{p}{,}\PY{l+m+mi}{4}\PY{p}{)}\PY{p}{)}
-                     \PY{k}{else}\PY{p}{:}
-                         \PY{n}{fig}\PY{p}{,} \PY{n}{ax} \PY{o}{=} \PY{n}{plt}\PY{o}{.}\PY{n}{subplots}\PY{p}{(}\PY{l+m+mi}{1}\PY{p}{,}\PY{n}{plot\PYZus{}columns}\PY{p}{,}\PY{n}{figsize}\PY{o}{=}\PY{p}{(}\PY{l+m+mi}{20}\PY{p}{,}\PY{l+m+mi}{4}\PY{p}{)}\PY{p}{)}
-                 \PY{k}{else}\PY{p}{:}
-                     \PY{n}{column} \PY{o}{+}\PY{o}{=} \PY{l+m+mi}{1}
-                 \PY{n}{df}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{n}{x}\PY{o}{=}\PY{p}{[}\PY{n}{col}\PY{p}{]}\PY{p}{,} \PY{n}{y}\PY{o}{=}\PY{p}{[}\PY{n}{target\PYZus{}column}\PY{p}{]}\PY{p}{,} \PY{n}{kind}\PY{o}{=}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{scatter}\PY{l+s+s2}{\PYZdq{}}\PY{p}{,} \PY{n}{ax} \PY{o}{=} \PY{n}{ax}\PY{p}{[}\PY{n}{column}\PY{p}{]} \PY{p}{)}
+{\color{incolor}In [{\color{incolor}1}]:} \PY{k}{def} \PY{n+nf}{plot\PYZus{}scatters}\PY{p}{(}\PY{n}{df}\PY{p}{,} \PY{n}{target\PYZus{}column}\PY{p}{)}\PY{p}{:}
+            \PY{n}{number\PYZus{}of\PYZus{}columns} \PY{o}{=} \PY{n+nb}{len}\PY{p}{(}\PY{n}{df}\PY{o}{.}\PY{n}{columns}\PY{o}{.}\PY{n}{values}\PY{p}{)}
+            \PY{n}{plot\PYZus{}columns} \PY{o}{=} \PY{l+m+mi}{5}
+            \PY{n}{whole\PYZus{}rows} \PY{o}{=} \PY{n+nb}{int}\PY{p}{(}\PY{n}{number\PYZus{}of\PYZus{}columns} \PY{o}{/} \PY{n}{plot\PYZus{}columns}\PY{p}{)}
+            \PY{n}{extrarow} \PY{o}{=} \PY{l+m+mi}{1} \PY{k}{if} \PY{n}{number\PYZus{}of\PYZus{}columns} \PY{o}{\PYZpc{}} \PY{n}{plot\PYZus{}columns} \PY{o}{\PYZgt{}} \PY{l+m+mi}{0} \PY{k}{else} \PY{l+m+mi}{0}
+        
+            \PY{n}{row} \PY{o}{=} \PY{o}{\PYZhy{}}\PY{l+m+mi}{1}
+            \PY{n}{column} \PY{o}{=} \PY{l+m+mi}{0}
+            \PY{k}{for} \PY{n}{i}\PY{p}{,} \PY{n}{col} \PY{o+ow}{in} \PY{n+nb}{enumerate}\PY{p}{(}\PY{n}{df}\PY{o}{.}\PY{n}{columns}\PY{o}{.}\PY{n}{values}\PY{p}{)}\PY{p}{:}
+        
+                \PY{n}{last\PYZus{}number\PYZus{}of\PYZus{}columns} \PY{o}{=} \PY{n}{number\PYZus{}of\PYZus{}columns}\PY{o}{\PYZpc{}}\PY{k}{plot\PYZus{}columns}
+                \PY{n}{is\PYZus{}last\PYZus{}row} \PY{o}{=} \PY{n+nb}{int}\PY{p}{(}\PY{n}{number\PYZus{}of\PYZus{}columns}\PY{o}{/}\PY{n}{plot\PYZus{}columns}\PY{p}{)}\PY{o}{*}\PY{n}{plot\PYZus{}columns} \PY{o}{\PYZlt{}}\PY{o}{=} \PY{n}{i}
+        
+                \PY{k}{if}\PY{p}{(}\PY{n}{i}\PY{o}{\PYZpc{}}\PY{k}{plot\PYZus{}columns} == 0):
+                    \PY{n}{row} \PY{o}{+}\PY{o}{=} \PY{l+m+mi}{1}
+                    \PY{n}{column} \PY{o}{=} \PY{l+m+mi}{0}
+                    \PY{k}{if} \PY{n}{is\PYZus{}last\PYZus{}row}\PY{p}{:}
+                        \PY{n}{fig}\PY{p}{,} \PY{n}{ax} \PY{o}{=} \PY{n}{plt}\PY{o}{.}\PY{n}{subplots}\PY{p}{(}\PY{l+m+mi}{1}\PY{p}{,}\PY{n}{last\PYZus{}number\PYZus{}of\PYZus{}columns}\PY{p}{,}\PY{n}{figsize}\PY{o}{=}\PY{p}{(}\PY{l+m+mi}{20}\PY{p}{,}\PY{l+m+mi}{4}\PY{p}{)}\PY{p}{)}
+                    \PY{k}{else}\PY{p}{:}
+                        \PY{n}{fig}\PY{p}{,} \PY{n}{ax} \PY{o}{=} \PY{n}{plt}\PY{o}{.}\PY{n}{subplots}\PY{p}{(}\PY{l+m+mi}{1}\PY{p}{,}\PY{n}{plot\PYZus{}columns}\PY{p}{,}\PY{n}{figsize}\PY{o}{=}\PY{p}{(}\PY{l+m+mi}{20}\PY{p}{,}\PY{l+m+mi}{4}\PY{p}{)}\PY{p}{)}
+                \PY{k}{else}\PY{p}{:}
+                    \PY{n}{column} \PY{o}{+}\PY{o}{=} \PY{l+m+mi}{1}
+                \PY{n}{df}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{n}{x}\PY{o}{=}\PY{p}{[}\PY{n}{col}\PY{p}{]}\PY{p}{,} \PY{n}{y}\PY{o}{=}\PY{p}{[}\PY{n}{target\PYZus{}column}\PY{p}{]}\PY{p}{,} \PY{n}{kind}\PY{o}{=}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{scatter}\PY{l+s+s2}{\PYZdq{}}\PY{p}{,} \PY{n}{ax} \PY{o}{=} \PY{n}{ax}\PY{p}{[}\PY{n}{column}\PY{p}{]} \PY{p}{)}
 \end{Verbatim}
 
 
@@ -886,7 +890,7 @@ között.
 
 
 \begin{Verbatim}[commandchars=\\\{\}]
-{\color{outcolor}Out[{\color{outcolor}25}]:} <matplotlib.axes.\_subplots.AxesSubplot at 0xc4aa69a710>
+{\color{outcolor}Out[{\color{outcolor}25}]:} <matplotlib.axes.\_subplots.AxesSubplot at 0x7241d22828>
 \end{Verbatim}
             
     \begin{center}
@@ -904,7 +908,7 @@ között.
 
 
 \begin{Verbatim}[commandchars=\\\{\}]
-{\color{outcolor}Out[{\color{outcolor}26}]:} <matplotlib.axes.\_subplots.AxesSubplot at 0xc4aa8e3588>
+{\color{outcolor}Out[{\color{outcolor}26}]:} <matplotlib.axes.\_subplots.AxesSubplot at 0x7241fe4f98>
 \end{Verbatim}
             
     \begin{center}
@@ -914,11 +918,10 @@ között.
     
     Napsugázásra is igaz, hogy 9 és 21 óra között 0
 
-    Nézzük, hogy ha nem termel a napelem, de a napsugárzás magas, az milyen
-időpontokban van.
+    Nézzük, hogy a legmagasabb napsugárzás milyen időpontokban van.
 
     \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor}27}]:} \PY{n}{mask} \PY{o}{=} \PY{p}{(}\PY{n}{df}\PY{p}{[}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{SOLAR\PYZus{}RAD}\PY{l+s+s2}{\PYZdq{}}\PY{p}{]}\PY{o}{\PYZgt{}}\PY{l+m+mf}{0.5}\PY{o}{*}\PY{n+nb}{pow}\PY{p}{(}\PY{l+m+mi}{10}\PY{p}{,}\PY{l+m+mi}{7}\PY{p}{)}\PY{p}{)}  \PY{o}{\PYZam{}} \PY{p}{(}\PY{n}{df}\PY{o}{.}\PY{n}{POWER} \PY{o}{==} \PY{l+m+mi}{0}\PY{p}{)}
+{\color{incolor}In [{\color{incolor}27}]:} \PY{n}{mask} \PY{o}{=} \PY{p}{(}\PY{n}{df}\PY{p}{[}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{SOLAR\PYZus{}RAD}\PY{l+s+s2}{\PYZdq{}}\PY{p}{]}\PY{o}{\PYZgt{}}\PY{l+m+mf}{0.5}\PY{o}{*}\PY{n+nb}{pow}\PY{p}{(}\PY{l+m+mi}{10}\PY{p}{,}\PY{l+m+mi}{7}\PY{p}{)}\PY{p}{)}
          \PY{n}{df\PYZus{}outlier} \PY{o}{=} \PY{n}{df}\PY{p}{[}\PY{n}{mask}\PY{p}{]}
          \PY{n}{df\PYZus{}outlier}\PY{p}{[}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{HOUR}\PY{l+s+s2}{\PYZdq{}}\PY{p}{]} \PY{o}{=} \PY{n}{df\PYZus{}outlier}\PY{o}{.}\PY{n}{index}\PY{o}{.}\PY{n}{hour}
          \PY{n}{df\PYZus{}outlier}\PY{p}{[}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{HOUR}\PY{l+s+s2}{\PYZdq{}}\PY{p}{]}\PY{o}{.}\PY{n}{hist}\PY{p}{(}\PY{p}{)}
@@ -926,7 +929,7 @@ időpontokban van.
 
 
 \begin{Verbatim}[commandchars=\\\{\}]
-{\color{outcolor}Out[{\color{outcolor}27}]:} <matplotlib.axes.\_subplots.AxesSubplot at 0xc4ab31a940>
+{\color{outcolor}Out[{\color{outcolor}27}]:} <matplotlib.axes.\_subplots.AxesSubplot at 0x7241db79e8>
 \end{Verbatim}
             
     \begin{center}
@@ -938,27 +941,25 @@ időpontokban van.
 jó, mivel akkor van éjszaka.
 
     \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor}28}]:} \PY{n+nb}{print}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+si}{\PYZob{}0\PYZcb{}}\PY{l+s+s2}{ darab sorunk van összesen, ebből }\PY{l+s+si}{\PYZob{}1\PYZcb{}}\PY{l+s+s2}{ darab outlier.}\PY{l+s+s2}{\PYZdq{}}\PY{o}{.}\PY{n}{format}\PY{p}{(}\PY{n+nb}{len}\PY{p}{(}\PY{n}{df}\PY{p}{)}\PY{p}{,}\PY{n+nb}{len}\PY{p}{(}\PY{n}{df\PYZus{}outlier}\PY{p}{)}\PY{p}{)}\PY{p}{)}
+{\color{incolor}In [{\color{incolor}28}]:} \PY{n+nb}{print}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+si}{\PYZob{}0\PYZcb{}}\PY{l+s+s2}{ darab értékünk van összesen, ebből }\PY{l+s+si}{\PYZob{}1\PYZcb{}}\PY{l+s+s2}{ darab biztosan outlier.}\PY{l+s+s2}{\PYZdq{}}\PY{o}{.}\PY{n}{format}\PY{p}{(}\PY{n+nb}{len}\PY{p}{(}\PY{n}{df}\PY{p}{)}\PY{p}{,}\PY{n+nb}{len}\PY{p}{(}\PY{n}{df\PYZus{}outlier}\PY{p}{)}\PY{p}{)}\PY{p}{)}
 \end{Verbatim}
 
 
     \begin{Verbatim}[commandchars=\\\{\}]
-18984 darab sorunk van összesen, ebből 161 darab outlier.
+18984 darab értékünk van összesen, ebből 182 darab biztosan outlier.
 
     \end{Verbatim}
 
     Nézzük máshogy, nézzük
 
     \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor}29}]:} \PY{n}{mask} \PY{o}{=} \PY{p}{(}\PY{n}{df}\PY{p}{[}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{HOUR}\PY{l+s+s2}{\PYZdq{}}\PY{p}{]}\PY{o}{\PYZgt{}}\PY{l+m+mi}{9}\PY{p}{)}  \PY{o}{\PYZam{}} \PY{p}{(}\PY{n}{df}\PY{o}{.}\PY{n}{HOUR} \PY{o}{\PYZlt{}} \PY{l+m+mi}{21}\PY{p}{)}
-         \PY{c+c1}{\PYZsh{}df[mask][\PYZdq{}SOLAR\PYZus{}RAD\PYZdq{}].hist()}
-         \PY{n+nb}{len}\PY{p}{(}\PY{n}{df}\PY{p}{[}\PY{n}{mask}\PY{p}{]}\PY{p}{)}
-         \PY{n}{sns}\PY{o}{.}\PY{n}{kdeplot}\PY{p}{(}\PY{n}{df}\PY{p}{[}\PY{n}{mask}\PY{p}{]}\PY{p}{[}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{SOLAR\PYZus{}RAD}\PY{l+s+s2}{\PYZdq{}}\PY{p}{]}\PY{p}{)}
+{\color{incolor}In [{\color{incolor}29}]:} \PY{n}{mask} \PY{o}{=} \PY{p}{(}\PY{n}{df}\PY{p}{[}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{HOUR}\PY{l+s+s2}{\PYZdq{}}\PY{p}{]}\PY{o}{\PYZlt{}}\PY{l+m+mi}{9}\PY{p}{)}  \PY{o}{|} \PY{p}{(}\PY{n}{df}\PY{o}{.}\PY{n}{HOUR} \PY{o}{|} \PY{l+m+mi}{21}\PY{p}{)}
+         \PY{n}{df}\PY{p}{[}\PY{n}{mask}\PY{p}{]}\PY{p}{[}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{SOLAR\PYZus{}RAD}\PY{l+s+s2}{\PYZdq{}}\PY{p}{]}\PY{o}{.}\PY{n}{hist}\PY{p}{(}\PY{p}{)}
 \end{Verbatim}
 
 
 \begin{Verbatim}[commandchars=\\\{\}]
-{\color{outcolor}Out[{\color{outcolor}29}]:} <matplotlib.axes.\_subplots.AxesSubplot at 0xc4ab622d68>
+{\color{outcolor}Out[{\color{outcolor}29}]:} <matplotlib.axes.\_subplots.AxesSubplot at 0x7242d36630>
 \end{Verbatim}
             
     \begin{center}
@@ -966,45 +967,19 @@ jó, mivel akkor van éjszaka.
     \end{center}
     { \hspace*{\fill} \\}
     
-    \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor}30}]:} \PY{n}{mask} \PY{o}{=} \PY{p}{(}\PY{n}{df}\PY{p}{[}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{HOUR}\PY{l+s+s2}{\PYZdq{}}\PY{p}{]}\PY{o}{\PYZlt{}}\PY{l+m+mi}{9}\PY{p}{)}  \PY{o}{|} \PY{p}{(}\PY{n}{df}\PY{o}{.}\PY{n}{HOUR} \PY{o}{|} \PY{l+m+mi}{21}\PY{p}{)}
-         \PY{n}{df}\PY{p}{[}\PY{n}{mask}\PY{p}{]}\PY{p}{[}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{SOLAR\PYZus{}RAD}\PY{l+s+s2}{\PYZdq{}}\PY{p}{]}\PY{o}{.}\PY{n}{hist}\PY{p}{(}\PY{p}{)}
-\end{Verbatim}
-
-
-\begin{Verbatim}[commandchars=\\\{\}]
-{\color{outcolor}Out[{\color{outcolor}30}]:} <matplotlib.axes.\_subplots.AxesSubplot at 0xc4ac655cc0>
-\end{Verbatim}
-            
-    \begin{center}
-    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_63_1.png}
-    \end{center}
-    { \hspace*{\fill} \\}
-    
-    Ebből, látszik, hogy van pár irreálisan magas érték.
-
-    \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor}31}]:} \PY{n}{mask} \PY{o}{=} \PY{p}{(}\PY{n}{df}\PY{p}{[}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{HOUR}\PY{l+s+s2}{\PYZdq{}}\PY{p}{]}\PY{o}{\PYZgt{}}\PY{l+m+mi}{9}\PY{p}{)}  \PY{o}{\PYZam{}} \PY{p}{(}\PY{n}{df}\PY{o}{.}\PY{n}{HOUR} \PY{o}{\PYZlt{}} \PY{l+m+mi}{21}\PY{p}{)} \PY{o}{\PYZam{}} \PY{p}{(}\PY{n}{df}\PY{o}{.}\PY{n}{SOLAR\PYZus{}RAD} \PY{o}{\PYZgt{}} \PY{n}{df}\PY{o}{.}\PY{n}{SOLAR\PYZus{}RAD}\PY{o}{.}\PY{n}{median}\PY{p}{(}\PY{p}{)}\PY{p}{)}
-         \PY{n+nb}{print}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+si}{\PYZob{}0\PYZcb{}}\PY{l+s+s2}{ darab sorunk van összesen, ebből }\PY{l+s+si}{\PYZob{}1\PYZcb{}}\PY{l+s+s2}{ darab outlier a solar rad tekintetében.}\PY{l+s+s2}{\PYZdq{}}\PY{o}{.}\PY{n}{format}\PY{p}{(}\PY{n+nb}{len}\PY{p}{(}\PY{n}{df}\PY{p}{)}\PY{p}{,}\PY{n+nb}{len}\PY{p}{(}\PY{n}{df}\PY{p}{[}\PY{n}{mask}\PY{p}{]}\PY{p}{)}\PY{p}{)}\PY{p}{)}
-\end{Verbatim}
-
-
-    \begin{Verbatim}[commandchars=\\\{\}]
-18984 darab sorunk van összesen, ebből 419 darab outlier a solar rad tekintetében.
-
-    \end{Verbatim}
+    Ebből, látszik, hogy máshol is van pár irreálisan magas érték.
 
     Felvettem a szezonalitás szerint szétbontott mezőket
 
     \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor}32}]:} \PY{n}{df}\PY{p}{[}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{RESID}\PY{l+s+s2}{\PYZdq{}}\PY{p}{]} \PY{o}{=} \PY{n}{seasonal\PYZus{}decompose}\PY{p}{(}\PY{n}{df}\PY{o}{.}\PY{n}{POWER}\PY{p}{)}\PY{o}{.}\PY{n}{resid}
+{\color{incolor}In [{\color{incolor}30}]:} \PY{n}{df}\PY{p}{[}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{RESID}\PY{l+s+s2}{\PYZdq{}}\PY{p}{]} \PY{o}{=} \PY{n}{seasonal\PYZus{}decompose}\PY{p}{(}\PY{n}{df}\PY{o}{.}\PY{n}{POWER}\PY{p}{)}\PY{o}{.}\PY{n}{resid}
          \PY{n}{df}\PY{p}{[}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{SEASONAL}\PY{l+s+s2}{\PYZdq{}}\PY{p}{]} \PY{o}{=} \PY{n}{seasonal\PYZus{}decompose}\PY{p}{(}\PY{n}{df}\PY{o}{.}\PY{n}{POWER}\PY{p}{)}\PY{o}{.}\PY{n}{seasonal}
          \PY{n}{df}\PY{p}{[}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{TREND}\PY{l+s+s2}{\PYZdq{}}\PY{p}{]} \PY{o}{=} \PY{n}{seasonal\PYZus{}decompose}\PY{p}{(}\PY{n}{df}\PY{o}{.}\PY{n}{POWER}\PY{p}{)}\PY{o}{.}\PY{n}{trend}
 \end{Verbatim}
 
 
     \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor}33}]:} \PY{n}{df}\PY{o}{.}\PY{n}{POWER}\PY{p}{[}\PY{p}{:}\PY{n}{ONE\PYZus{}WEEK}\PY{p}{]}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{n}{figsize}\PY{o}{=}\PY{p}{(}\PY{l+m+mi}{20}\PY{p}{,}\PY{l+m+mi}{5}\PY{p}{)}\PY{p}{)}
+{\color{incolor}In [{\color{incolor}31}]:} \PY{n}{df}\PY{o}{.}\PY{n}{POWER}\PY{p}{[}\PY{p}{:}\PY{n}{ONE\PYZus{}WEEK}\PY{p}{]}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{n}{figsize}\PY{o}{=}\PY{p}{(}\PY{l+m+mi}{20}\PY{p}{,}\PY{l+m+mi}{5}\PY{p}{)}\PY{p}{)}
          \PY{n}{df}\PY{o}{.}\PY{n}{SEASONAL}\PY{p}{[}\PY{p}{:}\PY{n}{ONE\PYZus{}WEEK}\PY{p}{]}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{n}{figsize}\PY{o}{=}\PY{p}{(}\PY{l+m+mi}{20}\PY{p}{,}\PY{l+m+mi}{5}\PY{p}{)}\PY{p}{)}
          \PY{n}{df}\PY{o}{.}\PY{n}{TREND}\PY{p}{[}\PY{p}{:}\PY{n}{ONE\PYZus{}WEEK}\PY{p}{]}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{n}{figsize}\PY{o}{=}\PY{p}{(}\PY{l+m+mi}{20}\PY{p}{,}\PY{l+m+mi}{5}\PY{p}{)}\PY{p}{)}
          \PY{n}{df}\PY{o}{.}\PY{n}{RESID}\PY{p}{[}\PY{p}{:}\PY{n}{ONE\PYZus{}WEEK}\PY{p}{]}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{n}{figsize}\PY{o}{=}\PY{p}{(}\PY{l+m+mi}{20}\PY{p}{,}\PY{l+m+mi}{5}\PY{p}{)}\PY{p}{)}
@@ -1012,27 +987,27 @@ jó, mivel akkor van éjszaka.
 
 
 \begin{Verbatim}[commandchars=\\\{\}]
-{\color{outcolor}Out[{\color{outcolor}33}]:} <matplotlib.axes.\_subplots.AxesSubplot at 0xc4ac6917f0>
+{\color{outcolor}Out[{\color{outcolor}31}]:} <matplotlib.axes.\_subplots.AxesSubplot at 0x7243d42588>
 \end{Verbatim}
             
     \begin{center}
-    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_68_1.png}
+    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_66_1.png}
     \end{center}
     { \hspace*{\fill} \\}
     
     \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor}34}]:} \PY{n}{ORIG} \PY{o}{=} \PY{n}{df}\PY{p}{[}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{RESID}\PY{l+s+s2}{\PYZdq{}}\PY{p}{]}\PY{o}{+}\PY{n}{df}\PY{p}{[}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{SEASONAL}\PY{l+s+s2}{\PYZdq{}}\PY{p}{]}\PY{o}{+}\PY{n}{df}\PY{p}{[}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{TREND}\PY{l+s+s2}{\PYZdq{}}\PY{p}{]}
+{\color{incolor}In [{\color{incolor}32}]:} \PY{n}{ORIG} \PY{o}{=} \PY{n}{df}\PY{p}{[}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{RESID}\PY{l+s+s2}{\PYZdq{}}\PY{p}{]}\PY{o}{+}\PY{n}{df}\PY{p}{[}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{SEASONAL}\PY{l+s+s2}{\PYZdq{}}\PY{p}{]}\PY{o}{+}\PY{n}{df}\PY{p}{[}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{TREND}\PY{l+s+s2}{\PYZdq{}}\PY{p}{]}
          \PY{n}{ORIG}\PY{p}{[}\PY{p}{:}\PY{n}{ONE\PYZus{}WEEK}\PY{p}{]}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{n}{figsize}\PY{o}{=}\PY{p}{(}\PY{l+m+mi}{20}\PY{p}{,}\PY{l+m+mi}{5}\PY{p}{)}\PY{p}{)}
          \PY{n}{df}\PY{o}{.}\PY{n}{POWER}\PY{p}{[}\PY{p}{:}\PY{n}{ONE\PYZus{}WEEK}\PY{p}{]}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{n}{figsize}\PY{o}{=}\PY{p}{(}\PY{l+m+mi}{20}\PY{p}{,}\PY{l+m+mi}{5}\PY{p}{)}\PY{p}{)}
 \end{Verbatim}
 
 
 \begin{Verbatim}[commandchars=\\\{\}]
-{\color{outcolor}Out[{\color{outcolor}34}]:} <matplotlib.axes.\_subplots.AxesSubplot at 0xc4ac7676d8>
+{\color{outcolor}Out[{\color{outcolor}32}]:} <matplotlib.axes.\_subplots.AxesSubplot at 0x7243e1c550>
 \end{Verbatim}
             
     \begin{center}
-    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_69_1.png}
+    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_67_1.png}
     \end{center}
     { \hspace*{\fill} \\}
     
@@ -1042,7 +1017,7 @@ visszaadja az eredeti függvényt.
     Megnéztem a korrelációt az összes mező között
 
     \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor}35}]:} \PY{n}{fig}\PY{p}{,} \PY{n}{ax} \PY{o}{=} \PY{n}{plt}\PY{o}{.}\PY{n}{subplots}\PY{p}{(}\PY{n}{figsize}\PY{o}{=}\PY{p}{(}\PY{l+m+mi}{14}\PY{p}{,}\PY{l+m+mi}{8}\PY{p}{)}\PY{p}{)}         \PY{c+c1}{\PYZsh{} Sample figsize in inches}
+{\color{incolor}In [{\color{incolor}33}]:} \PY{n}{fig}\PY{p}{,} \PY{n}{ax} \PY{o}{=} \PY{n}{plt}\PY{o}{.}\PY{n}{subplots}\PY{p}{(}\PY{n}{figsize}\PY{o}{=}\PY{p}{(}\PY{l+m+mi}{14}\PY{p}{,}\PY{l+m+mi}{8}\PY{p}{)}\PY{p}{)}         \PY{c+c1}{\PYZsh{} Sample figsize in inches}
          
          \PY{n}{f} \PY{o}{=} \PY{p}{(}
              \PY{n}{df}\PY{o}{.}\PY{n}{loc}\PY{p}{[}\PY{p}{:}\PY{p}{,} \PY{n}{df}\PY{o}{.}\PY{n}{columns}\PY{p}{]}
@@ -1054,11 +1029,11 @@ visszaadja az eredeti függvényt.
 
 
 \begin{Verbatim}[commandchars=\\\{\}]
-{\color{outcolor}Out[{\color{outcolor}35}]:} <matplotlib.axes.\_subplots.AxesSubplot at 0xc4ac7d7eb8>
+{\color{outcolor}Out[{\color{outcolor}33}]:} <matplotlib.axes.\_subplots.AxesSubplot at 0x7243d428d0>
 \end{Verbatim}
             
     \begin{center}
-    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_72_1.png}
+    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_70_1.png}
     \end{center}
     { \hspace*{\fill} \\}
     
@@ -1073,12 +1048,12 @@ minden időponthoz kiszámolható. Gépi tanulással pedig a residual és
 talán a trend komponenseket predictelem.
 
     \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor}36}]:} \PY{n}{df}\PY{p}{[}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{RT}\PY{l+s+s2}{\PYZdq{}}\PY{p}{]} \PY{o}{=} \PY{n}{df}\PY{p}{[}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{SEASONAL}\PY{l+s+s2}{\PYZdq{}}\PY{p}{]} \PY{o}{+} \PY{n}{df}\PY{p}{[}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{RESID}\PY{l+s+s2}{\PYZdq{}}\PY{p}{]}
+{\color{incolor}In [{\color{incolor}34}]:} \PY{n}{df}\PY{p}{[}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{RT}\PY{l+s+s2}{\PYZdq{}}\PY{p}{]} \PY{o}{=} \PY{n}{df}\PY{p}{[}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{SEASONAL}\PY{l+s+s2}{\PYZdq{}}\PY{p}{]} \PY{o}{+} \PY{n}{df}\PY{p}{[}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{RESID}\PY{l+s+s2}{\PYZdq{}}\PY{p}{]}
 \end{Verbatim}
 
 
     \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor}37}]:} \PY{n}{df\PYZus{}to\PYZus{}plot} \PY{o}{=} \PY{n}{df}\PY{o}{.}\PY{n}{drop}\PY{p}{(}\PY{p}{[}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{SEASONAL}\PY{l+s+s2}{\PYZdq{}}\PY{p}{,}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{HOUR}\PY{l+s+s2}{\PYZdq{}}\PY{p}{,}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{MONTH}\PY{l+s+s2}{\PYZdq{}}\PY{p}{,}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{RESID}\PY{l+s+s2}{\PYZdq{}}\PY{p}{,}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{TREND}\PY{l+s+s2}{\PYZdq{}}\PY{p}{]}\PY{p}{,}\PY{n}{axis}\PY{o}{=}\PY{l+m+mi}{1}\PY{p}{)}
+{\color{incolor}In [{\color{incolor}35}]:} \PY{n}{df\PYZus{}to\PYZus{}plot} \PY{o}{=} \PY{n}{df}\PY{o}{.}\PY{n}{drop}\PY{p}{(}\PY{p}{[}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{SEASONAL}\PY{l+s+s2}{\PYZdq{}}\PY{p}{,}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{HOUR}\PY{l+s+s2}{\PYZdq{}}\PY{p}{,}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{MONTH}\PY{l+s+s2}{\PYZdq{}}\PY{p}{,}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{RESID}\PY{l+s+s2}{\PYZdq{}}\PY{p}{,}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{TREND}\PY{l+s+s2}{\PYZdq{}}\PY{p}{]}\PY{p}{,}\PY{n}{axis}\PY{o}{=}\PY{l+m+mi}{1}\PY{p}{)}
          \PY{n}{fig}\PY{p}{,} \PY{n}{ax} \PY{o}{=} \PY{n}{plt}\PY{o}{.}\PY{n}{subplots}\PY{p}{(}\PY{n}{figsize}\PY{o}{=}\PY{p}{(}\PY{l+m+mi}{14}\PY{p}{,}\PY{l+m+mi}{8}\PY{p}{)}\PY{p}{)}         \PY{c+c1}{\PYZsh{} Sample figsize in inches}
          
          \PY{n}{f} \PY{o}{=} \PY{p}{(}
@@ -1091,18 +1066,54 @@ talán a trend komponenseket predictelem.
 
 
 \begin{Verbatim}[commandchars=\\\{\}]
-{\color{outcolor}Out[{\color{outcolor}37}]:} <matplotlib.axes.\_subplots.AxesSubplot at 0xc4aa95f630>
+{\color{outcolor}Out[{\color{outcolor}35}]:} <matplotlib.axes.\_subplots.AxesSubplot at 0x7241c1b7b8>
 \end{Verbatim}
             
     \begin{center}
-    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_75_1.png}
+    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_73_1.png}
     \end{center}
     { \hspace*{\fill} \\}
     
     Relatív páratartalom, napsugárzás és hőmérséklet amik fontosabbak.
 
     \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor}38}]:} \PY{n}{plot\PYZus{}scatters}\PY{p}{(}\PY{n}{df}\PY{o}{.}\PY{n}{sample}\PY{p}{(}\PY{l+m+mi}{200}\PY{p}{)}\PY{p}{,}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{RT}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}
+{\color{incolor}In [{\color{incolor}36}]:} \PY{n}{plot\PYZus{}scatters}\PY{p}{(}\PY{n}{df}\PY{o}{.}\PY{n}{sample}\PY{p}{(}\PY{l+m+mi}{200}\PY{p}{)}\PY{p}{,}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{RT}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}
+\end{Verbatim}
+
+
+    \begin{center}
+    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_75_0.png}
+    \end{center}
+    { \hspace*{\fill} \\}
+    
+    \begin{center}
+    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_75_1.png}
+    \end{center}
+    { \hspace*{\fill} \\}
+    
+    \begin{center}
+    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_75_2.png}
+    \end{center}
+    { \hspace*{\fill} \\}
+    
+    \begin{center}
+    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_75_3.png}
+    \end{center}
+    { \hspace*{\fill} \\}
+    
+    \begin{Verbatim}[commandchars=\\\{\}]
+{\color{incolor}In [{\color{incolor}37}]:} \PY{k}{def} \PY{n+nf}{plot\PYZus{}lags\PYZus{}and\PYZus{}auto}\PY{p}{(}\PY{n}{df}\PY{p}{)}\PY{p}{:}
+             \PY{n}{columns} \PY{o}{=} \PY{n+nb}{len}\PY{p}{(}\PY{n}{df}\PY{o}{.}\PY{n}{columns}\PY{p}{)}
+             \PY{k}{for} \PY{n}{col} \PY{o+ow}{in} \PY{n}{df}\PY{o}{.}\PY{n}{columns}\PY{p}{:}
+                 \PY{n}{fig}\PY{p}{,} \PY{n}{ax} \PY{o}{=} \PY{n}{plt}\PY{o}{.}\PY{n}{subplots}\PY{p}{(}\PY{l+m+mi}{1}\PY{p}{,}\PY{l+m+mi}{2}\PY{p}{,}\PY{n}{figsize}\PY{o}{=}\PY{p}{(}\PY{l+m+mi}{20}\PY{p}{,}\PY{l+m+mi}{5}\PY{p}{)}\PY{p}{)}
+                 \PY{n}{fig}\PY{o}{.}\PY{n}{suptitle}\PY{p}{(}\PY{n}{col}\PY{p}{,} \PY{n}{fontsize}\PY{o}{=}\PY{l+m+mi}{16}\PY{p}{)}
+                 \PY{n}{lag\PYZus{}plot}\PY{p}{(}\PY{n}{df}\PY{p}{[}\PY{n}{col}\PY{p}{]}\PY{o}{.}\PY{n}{tail}\PY{p}{(}\PY{l+m+mi}{250}\PY{p}{)}\PY{p}{,}\PY{n}{ax} \PY{o}{=}\PY{n}{ax}\PY{p}{[}\PY{l+m+mi}{0}\PY{p}{]}\PY{p}{)}
+                 \PY{n}{autocorrelation\PYZus{}plot}\PY{p}{(}\PY{n}{df}\PY{p}{[}\PY{n}{col}\PY{p}{]}\PY{o}{.}\PY{n}{tail}\PY{p}{(}\PY{l+m+mi}{250}\PY{p}{)}\PY{p}{,} \PY{n}{ax} \PY{o}{=} \PY{n}{ax}\PY{p}{[}\PY{l+m+mi}{1}\PY{p}{]}\PY{p}{)}
+\end{Verbatim}
+
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+{\color{incolor}In [{\color{incolor}38}]:} \PY{n}{plot\PYZus{}lags\PYZus{}and\PYZus{}auto}\PY{p}{(}\PY{n}{df}\PY{p}{)}
 \end{Verbatim}
 
 
@@ -1126,117 +1137,78 @@ talán a trend komponenseket predictelem.
     \end{center}
     { \hspace*{\fill} \\}
     
-    \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor}39}]:} \PY{k+kn}{import} \PY{n+nn}{pandas} \PY{k}{as} \PY{n+nn}{pd}
-         \PY{k+kn}{import} \PY{n+nn}{matplotlib}\PY{n+nn}{.}\PY{n+nn}{pyplot} \PY{k}{as} \PY{n+nn}{plt}
-         
-         \PY{k}{def} \PY{n+nf}{plot\PYZus{}lags\PYZus{}and\PYZus{}auto}\PY{p}{(}\PY{n}{df}\PY{p}{)}\PY{p}{:}
-             \PY{n}{columns} \PY{o}{=} \PY{n+nb}{len}\PY{p}{(}\PY{n}{df}\PY{o}{.}\PY{n}{columns}\PY{p}{)}
-             \PY{k}{for} \PY{n}{col} \PY{o+ow}{in} \PY{n}{df}\PY{o}{.}\PY{n}{columns}\PY{p}{:}
-                 \PY{n}{fig}\PY{p}{,} \PY{n}{ax} \PY{o}{=} \PY{n}{plt}\PY{o}{.}\PY{n}{subplots}\PY{p}{(}\PY{l+m+mi}{1}\PY{p}{,}\PY{l+m+mi}{2}\PY{p}{,}\PY{n}{figsize}\PY{o}{=}\PY{p}{(}\PY{l+m+mi}{20}\PY{p}{,}\PY{l+m+mi}{5}\PY{p}{)}\PY{p}{)}
-                 \PY{n}{fig}\PY{o}{.}\PY{n}{suptitle}\PY{p}{(}\PY{n}{col}\PY{p}{,} \PY{n}{fontsize}\PY{o}{=}\PY{l+m+mi}{16}\PY{p}{)}
-                 \PY{n}{lag\PYZus{}plot}\PY{p}{(}\PY{n}{df}\PY{p}{[}\PY{n}{col}\PY{p}{]}\PY{o}{.}\PY{n}{tail}\PY{p}{(}\PY{l+m+mi}{250}\PY{p}{)}\PY{p}{,}\PY{n}{ax} \PY{o}{=}\PY{n}{ax}\PY{p}{[}\PY{l+m+mi}{0}\PY{p}{]}\PY{p}{)}
-                 \PY{n}{autocorrelation\PYZus{}plot}\PY{p}{(}\PY{n}{df}\PY{p}{[}\PY{n}{col}\PY{p}{]}\PY{o}{.}\PY{n}{tail}\PY{p}{(}\PY{l+m+mi}{250}\PY{p}{)}\PY{p}{,} \PY{n}{ax} \PY{o}{=} \PY{n}{ax}\PY{p}{[}\PY{l+m+mi}{1}\PY{p}{]}\PY{p}{)}
-\end{Verbatim}
-
-
-    \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor}40}]:} \PY{n}{plot\PYZus{}lags\PYZus{}and\PYZus{}auto}\PY{p}{(}\PY{n}{df}\PY{p}{)}
-\end{Verbatim}
-
-
     \begin{center}
-    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_79_0.png}
+    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_77_4.png}
     \end{center}
     { \hspace*{\fill} \\}
     
     \begin{center}
-    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_79_1.png}
+    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_77_5.png}
     \end{center}
     { \hspace*{\fill} \\}
     
     \begin{center}
-    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_79_2.png}
+    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_77_6.png}
     \end{center}
     { \hspace*{\fill} \\}
     
     \begin{center}
-    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_79_3.png}
+    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_77_7.png}
     \end{center}
     { \hspace*{\fill} \\}
     
     \begin{center}
-    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_79_4.png}
+    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_77_8.png}
     \end{center}
     { \hspace*{\fill} \\}
     
     \begin{center}
-    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_79_5.png}
+    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_77_9.png}
     \end{center}
     { \hspace*{\fill} \\}
     
     \begin{center}
-    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_79_6.png}
+    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_77_10.png}
     \end{center}
     { \hspace*{\fill} \\}
     
     \begin{center}
-    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_79_7.png}
+    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_77_11.png}
     \end{center}
     { \hspace*{\fill} \\}
     
     \begin{center}
-    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_79_8.png}
+    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_77_12.png}
     \end{center}
     { \hspace*{\fill} \\}
     
     \begin{center}
-    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_79_9.png}
+    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_77_13.png}
     \end{center}
     { \hspace*{\fill} \\}
     
     \begin{center}
-    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_79_10.png}
+    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_77_14.png}
     \end{center}
     { \hspace*{\fill} \\}
     
     \begin{center}
-    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_79_11.png}
+    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_77_15.png}
     \end{center}
     { \hspace*{\fill} \\}
     
     \begin{center}
-    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_79_12.png}
+    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_77_16.png}
     \end{center}
     { \hspace*{\fill} \\}
     
     \begin{center}
-    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_79_13.png}
+    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_77_17.png}
     \end{center}
     { \hspace*{\fill} \\}
     
     \begin{center}
-    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_79_14.png}
-    \end{center}
-    { \hspace*{\fill} \\}
-    
-    \begin{center}
-    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_79_15.png}
-    \end{center}
-    { \hspace*{\fill} \\}
-    
-    \begin{center}
-    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_79_16.png}
-    \end{center}
-    { \hspace*{\fill} \\}
-    
-    \begin{center}
-    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_79_17.png}
-    \end{center}
-    { \hspace*{\fill} \\}
-    
-    \begin{center}
-    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_79_18.png}
+    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_77_18.png}
     \end{center}
     { \hspace*{\fill} \\}
     
@@ -1248,7 +1220,7 @@ humidity * WIND U * WIND V * Temperature
 pressure és a temperature. Illetve a célváltozót is.
 
     \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor}41}]:} \PY{n}{df\PYZus{}to\PYZus{}plot} \PY{o}{=} \PY{n}{df}\PY{o}{.}\PY{n}{drop}\PY{p}{(}\PY{p}{[}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{SEASONAL}\PY{l+s+s2}{\PYZdq{}}\PY{p}{,}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{HOUR}\PY{l+s+s2}{\PYZdq{}}\PY{p}{,}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{MONTH}\PY{l+s+s2}{\PYZdq{}}\PY{p}{,}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{RESID}\PY{l+s+s2}{\PYZdq{}}\PY{p}{,}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{TREND}\PY{l+s+s2}{\PYZdq{}}\PY{p}{]}\PY{p}{,}\PY{n}{axis}\PY{o}{=}\PY{l+m+mi}{1}\PY{p}{)}\PY{o}{.}\PY{n}{resample}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{D}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}\PY{o}{.}\PY{n}{mean}\PY{p}{(}\PY{p}{)}
+{\color{incolor}In [{\color{incolor}39}]:} \PY{n}{df\PYZus{}to\PYZus{}plot} \PY{o}{=} \PY{n}{df}\PY{o}{.}\PY{n}{drop}\PY{p}{(}\PY{p}{[}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{SEASONAL}\PY{l+s+s2}{\PYZdq{}}\PY{p}{,}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{HOUR}\PY{l+s+s2}{\PYZdq{}}\PY{p}{,}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{MONTH}\PY{l+s+s2}{\PYZdq{}}\PY{p}{,}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{RESID}\PY{l+s+s2}{\PYZdq{}}\PY{p}{,}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{TREND}\PY{l+s+s2}{\PYZdq{}}\PY{p}{]}\PY{p}{,}\PY{n}{axis}\PY{o}{=}\PY{l+m+mi}{1}\PY{p}{)}\PY{o}{.}\PY{n}{resample}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{D}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}\PY{o}{.}\PY{n}{mean}\PY{p}{(}\PY{p}{)}
          \PY{n}{fig}\PY{p}{,} \PY{n}{ax} \PY{o}{=} \PY{n}{plt}\PY{o}{.}\PY{n}{subplots}\PY{p}{(}\PY{n}{figsize}\PY{o}{=}\PY{p}{(}\PY{l+m+mi}{14}\PY{p}{,}\PY{l+m+mi}{8}\PY{p}{)}\PY{p}{)}         \PY{c+c1}{\PYZsh{} Sample figsize in inches}
          
          \PY{n}{f} \PY{o}{=} \PY{p}{(}
@@ -1261,11 +1233,11 @@ pressure és a temperature. Illetve a célváltozót is.
 
 
 \begin{Verbatim}[commandchars=\\\{\}]
-{\color{outcolor}Out[{\color{outcolor}41}]:} <matplotlib.axes.\_subplots.AxesSubplot at 0xc4ae8b9e10>
+{\color{outcolor}Out[{\color{outcolor}39}]:} <matplotlib.axes.\_subplots.AxesSubplot at 0x7245d98208>
 \end{Verbatim}
             
     \begin{center}
-    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_82_1.png}
+    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_80_1.png}
     \end{center}
     { \hspace*{\fill} \\}
     
@@ -1275,7 +1247,7 @@ pressure és a temperature. Illetve a célváltozót is.
 fennt említett mezőkhöz.
 
     \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor}42}]:} \PY{n}{df\PYZus{}to\PYZus{}train} \PY{o}{=} \PY{n}{df}\PY{p}{[}\PY{p}{[}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{POWER}\PY{l+s+s2}{\PYZdq{}}\PY{p}{,}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{SURFACE\PYZus{}PRESSURE}\PY{l+s+s2}{\PYZdq{}}\PY{p}{,}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{TEMPERATURE}\PY{l+s+s2}{\PYZdq{}}\PY{p}{,}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{HOUR}\PY{l+s+s2}{\PYZdq{}}\PY{p}{,}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{MONTH}\PY{l+s+s2}{\PYZdq{}}\PY{p}{]}\PY{p}{]}
+{\color{incolor}In [{\color{incolor}40}]:} \PY{n}{df\PYZus{}to\PYZus{}train} \PY{o}{=} \PY{n}{df}\PY{p}{[}\PY{p}{[}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{POWER}\PY{l+s+s2}{\PYZdq{}}\PY{p}{,}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{SURFACE\PYZus{}PRESSURE}\PY{l+s+s2}{\PYZdq{}}\PY{p}{,}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{TEMPERATURE}\PY{l+s+s2}{\PYZdq{}}\PY{p}{,}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{HOUR}\PY{l+s+s2}{\PYZdq{}}\PY{p}{,}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{MONTH}\PY{l+s+s2}{\PYZdq{}}\PY{p}{]}\PY{p}{]}
          \PY{k}{for} \PY{n}{column} \PY{o+ow}{in} \PY{p}{[}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{POWER}\PY{l+s+s2}{\PYZdq{}}\PY{p}{,}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{SURFACE\PYZus{}PRESSURE}\PY{l+s+s2}{\PYZdq{}}\PY{p}{,}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{TEMPERATURE}\PY{l+s+s2}{\PYZdq{}}\PY{p}{]}\PY{p}{:}
              \PY{n}{rolling\PYZus{}column} \PY{o}{=} \PY{n}{df\PYZus{}to\PYZus{}train}\PY{p}{[}\PY{n}{column}\PY{p}{]}\PY{o}{.}\PY{n}{rolling}\PY{p}{(}\PY{n}{window} \PY{o}{=} \PY{l+m+mi}{24}\PY{p}{)}
              \PY{n}{shift} \PY{o}{=} \PY{l+m+mi}{24}
@@ -1290,8 +1262,6 @@ fennt említett mezőkhöz.
          \PY{n}{y\PYZus{}train} \PY{o}{=} \PY{n}{df\PYZus{}to\PYZus{}train}\PY{p}{[}\PY{p}{:}\PY{n}{ONE\PYZus{}YEAR}\PY{p}{]}\PY{o}{.}\PY{n}{dropna}\PY{p}{(}\PY{n}{axis} \PY{o}{=} \PY{l+m+mi}{0}\PY{p}{)}\PY{o}{.}\PY{n}{POWER}
          \PY{n}{X\PYZus{}test} \PY{o}{=} \PY{n}{df\PYZus{}to\PYZus{}train}\PY{p}{[}\PY{n}{ONE\PYZus{}YEAR}\PY{p}{:}\PY{p}{]}\PY{o}{.}\PY{n}{dropna}\PY{p}{(}\PY{n}{axis} \PY{o}{=} \PY{l+m+mi}{0}\PY{p}{)}\PY{o}{.}\PY{n}{drop}\PY{p}{(}\PY{p}{[}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{POWER}\PY{l+s+s2}{\PYZdq{}}\PY{p}{,}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{SURFACE\PYZus{}PRESSURE}\PY{l+s+s2}{\PYZdq{}}\PY{p}{,}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{TEMPERATURE}\PY{l+s+s2}{\PYZdq{}}\PY{p}{]}\PY{p}{,}\PY{n}{axis}\PY{o}{=}\PY{l+m+mi}{1}\PY{p}{)}
          \PY{n}{y\PYZus{}test} \PY{o}{=} \PY{n}{df\PYZus{}to\PYZus{}train}\PY{p}{[}\PY{n}{ONE\PYZus{}YEAR}\PY{p}{:}\PY{p}{]}\PY{o}{.}\PY{n}{dropna}\PY{p}{(}\PY{n}{axis} \PY{o}{=} \PY{l+m+mi}{0}\PY{p}{)}\PY{o}{.}\PY{n}{POWER}
-         \PY{c+c1}{\PYZsh{}print(len(df\PYZus{}to\PYZus{}train))}
-         \PY{c+c1}{\PYZsh{}print(len(df\PYZus{}to\PYZus{}train.dropna(axis=0)))}
 \end{Verbatim}
 
 
@@ -1299,8 +1269,7 @@ fennt említett mezőkhöz.
 tároljam le.
 
     \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor}43}]:} \PY{k+kn}{from} \PY{n+nn}{sklearn}\PY{n+nn}{.}\PY{n+nn}{metrics} \PY{k}{import} \PY{n}{mean\PYZus{}squared\PYZus{}error}\PY{p}{,}\PY{n}{explained\PYZus{}variance\PYZus{}score}
-         \PY{k}{def} \PY{n+nf}{train\PYZus{}predict\PYZus{}and\PYZus{}score}\PY{p}{(}\PY{n}{X\PYZus{}train}\PY{p}{,} \PY{n}{y\PYZus{}train}\PY{p}{,}\PY{n}{X\PYZus{}test}\PY{p}{,}\PY{n}{y\PYZus{}test}\PY{p}{,}\PY{n}{models}\PY{p}{,}\PY{n}{names}\PY{p}{)}\PY{p}{:}
+{\color{incolor}In [{\color{incolor}41}]:} \PY{k}{def} \PY{n+nf}{train\PYZus{}predict\PYZus{}and\PYZus{}score}\PY{p}{(}\PY{n}{X\PYZus{}train}\PY{p}{,} \PY{n}{y\PYZus{}train}\PY{p}{,}\PY{n}{X\PYZus{}test}\PY{p}{,}\PY{n}{y\PYZus{}test}\PY{p}{,}\PY{n}{models}\PY{p}{,}\PY{n}{names}\PY{p}{)}\PY{p}{:}
              \PY{k}{for} \PY{n}{name}\PY{p}{,}\PY{n}{model} \PY{o+ow}{in} \PY{n+nb}{zip}\PY{p}{(}\PY{n}{names}\PY{p}{,}\PY{n}{models}\PY{p}{)}\PY{p}{:}
                  \PY{n}{model}\PY{o}{.}\PY{n}{fit}\PY{p}{(}\PY{n}{X\PYZus{}train}\PY{p}{,} \PY{n}{y\PYZus{}train}\PY{p}{)}
                  \PY{n}{y\PYZus{}pred} \PY{o}{=} \PY{n}{model}\PY{o}{.}\PY{n}{predict}\PY{p}{(}\PY{n}{X\PYZus{}test}\PY{p}{)}
@@ -1312,11 +1281,8 @@ tároljam le.
 
 
     \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor}44}]:} \PY{k+kn}{from} \PY{n+nn}{xgboost} \PY{k}{import} \PY{n}{XGBRegressor}
-         \PY{k+kn}{from} \PY{n+nn}{sklearn}\PY{n+nn}{.}\PY{n+nn}{linear\PYZus{}model} \PY{k}{import} \PY{n}{Lasso}\PY{p}{,}\PY{n}{ElasticNet}\PY{p}{,}\PY{n}{Ridge}
-         \PY{k+kn}{from} \PY{n+nn}{sklearn}\PY{n+nn}{.}\PY{n+nn}{svm} \PY{k}{import} \PY{n}{SVR}\PY{p}{,}\PY{n}{LinearSVR}
-         \PY{n}{names}\PY{o}{=}\PY{p}{[}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{XGBoost Linear}\PY{l+s+s2}{\PYZdq{}}\PY{p}{,} \PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{XGBoost Tree}\PY{l+s+s2}{\PYZdq{}}\PY{p}{,} \PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{Lasso}\PY{l+s+s2}{\PYZdq{}}\PY{p}{,}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{Elastic Net}\PY{l+s+s2}{\PYZdq{}}\PY{p}{,}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{Ridge}\PY{l+s+s2}{\PYZdq{}}\PY{p}{]}
-         \PY{n}{models} \PY{o}{=} \PY{p}{[}\PY{n}{XGBRegressor}\PY{p}{(}\PY{n}{booster}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{gblinear}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}\PY{p}{,}\PY{n}{XGBRegressor}\PY{p}{(}\PY{p}{)}\PY{p}{,}\PY{n}{Lasso}\PY{p}{(}\PY{p}{)}\PY{p}{,}\PY{n}{ElasticNet}\PY{p}{(}\PY{p}{)}\PY{p}{,}\PY{n}{Ridge}\PY{p}{(}\PY{p}{)}\PY{p}{]}
+{\color{incolor}In [{\color{incolor}42}]:} \PY{n}{names}\PY{o}{=}\PY{p}{[}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{LinReg}\PY{l+s+s2}{\PYZdq{}}\PY{p}{,}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{XGBoost Linear}\PY{l+s+s2}{\PYZdq{}}\PY{p}{,} \PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{XGBoost Tree}\PY{l+s+s2}{\PYZdq{}}\PY{p}{,} \PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{Lasso}\PY{l+s+s2}{\PYZdq{}}\PY{p}{,}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{Elastic Net}\PY{l+s+s2}{\PYZdq{}}\PY{p}{,}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{Ridge}\PY{l+s+s2}{\PYZdq{}}\PY{p}{]}
+         \PY{n}{models} \PY{o}{=} \PY{p}{[}\PY{n}{LinearRegression}\PY{p}{(}\PY{p}{)}\PY{p}{,}\PY{n}{XGBRegressor}\PY{p}{(}\PY{n}{booster}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{gblinear}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}\PY{p}{,}\PY{n}{XGBRegressor}\PY{p}{(}\PY{p}{)}\PY{p}{,}\PY{n}{Lasso}\PY{p}{(}\PY{p}{)}\PY{p}{,}\PY{n}{ElasticNet}\PY{p}{(}\PY{p}{)}\PY{p}{,}\PY{n}{Ridge}\PY{p}{(}\PY{p}{)}\PY{p}{]}
          \PY{n}{train\PYZus{}predict\PYZus{}and\PYZus{}score}\PY{p}{(}\PY{n}{X\PYZus{}train}\PY{p}{,}\PY{n}{y\PYZus{}train}\PY{p}{,}\PY{n}{X\PYZus{}test}\PY{p}{,}\PY{n}{y\PYZus{}test}\PY{p}{,}\PY{n}{models}\PY{p}{,}\PY{n}{names}\PY{p}{)}
 \end{Verbatim}
 
@@ -1330,31 +1296,87 @@ D:\textbackslash{}Continuum\textbackslash{}anaconda3\textbackslash{}lib\textback
     \end{Verbatim}
 
     \begin{center}
-    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_88_1.png}
+    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_86_1.png}
     \end{center}
     { \hspace*{\fill} \\}
     
     \begin{center}
-    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_88_2.png}
+    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_86_2.png}
     \end{center}
     { \hspace*{\fill} \\}
     
     \begin{center}
-    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_88_3.png}
+    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_86_3.png}
     \end{center}
     { \hspace*{\fill} \\}
     
     \begin{center}
-    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_88_4.png}
+    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_86_4.png}
     \end{center}
     { \hspace*{\fill} \\}
     
     \begin{center}
-    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_88_5.png}
+    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_86_5.png}
+    \end{center}
+    { \hspace*{\fill} \\}
+    
+    \begin{center}
+    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_86_6.png}
     \end{center}
     { \hspace*{\fill} \\}
     
     Ez alapján az XGBoost tűnik a leghatékonyabbnak.
+
+    \subsection{Amit lehetné még meg kell csinálni/javítani
+kell:}\label{amit-lehetnuxe9-muxe9g-meg-kell-csinuxe1lnijavuxedtani-kell}
+
+\begin{itemize}
+\tightlist
+\item
+  Megcsinálni a többi zónára is
+\item
+  Jobb Feature selection
+\item
+  Algoritmusok paraméterezése
+\item
+  Tényleg csak a residual-t predictelni és összeadni a seasonality-vel
+\item
+  A napsugárzás változóból kidobálni az outliereket és felhasználni
+\item
+  Más rolling window értékek kipróbálása. Bár szerintem 48 óránál
+  nagyobb nem nagyon jön szóba.
+\item
+  ARIMA modell implementálása
+\end{itemize}
+
+    \subsection{Konzultáció}\label{konzultuxe1ciuxf3}
+
+\begin{itemize}
+\tightlist
+\item
+  Írjam le miért kell a kauzalitást őrizni
+\item
+  Baseline modell összehasonlításhoz
+\item
+  Mérnöki döntések, mit, miért, milyen döntések mentén
+\item
+  Megoldás erősségei, gyengeségei, továbbfejlesztési lehetőségei
+  (paraméter optimalizálás esetleg, jobb feature selection)
+\item
+  Továbblépési lehetőségek: milyen külső adathalmazt lehetne bekötni.
+\item
+  Predictors az előrejelzés, nem mért adat.
+\item
+  Ötlet: karakterisztikát kell
+\item
+  Érdemes lineárisra hozni az összefüggéseket
+\item
+  Meteorológia adatok forecastok.
+\item
+  Diploma terv portált, latex, megnézni
+\item
+  Prezi struktúrában ugyanaz, de inkább overview
+\end{itemize}
 
 
     % Add a bibliography block to the postdoc
