@@ -5,6 +5,8 @@ from scipy import fftpack
 from sklearn.metrics import mean_squared_error,mean_absolute_error
 from sklearn.model_selection import train_test_split,TimeSeriesSplit,cross_val_score
 
+ONE_WEEK = 24*7
+
 def train_predict(X_train, y_train,X_test,model):
     model.fit(X_train, y_train)
     y_pred = model.predict(X_test)
@@ -26,17 +28,17 @@ def evaluate_model(df,model,step,size,max_train_size,plot_results):
         y_preds = np.append(y_preds,y_pred)
         y_tests = np.append(y_tests,y_test.values)
     if plot_results:
-        plt.figure(figsize=(15, 7))
-        plt.plot(y_preds[-2*ONE_WEEK:-1*ONE_WEEK], "g", label="prediction", linewidth=2.0)
-        plt.plot(y_tests[-2*ONE_WEEK:-1*ONE_WEEK], label="actual", linewidth=2.0)
+        fig, ax = plt.subplots(1,1,figsize=(20,3))
+        fig.suptitle('Előrejelzés XGBoost-al', fontsize=16)
+        ax.plot(np.arange(0,len(y_tests[-2*ONE_WEEK:-1*ONE_WEEK])),y_tests[-2*ONE_WEEK:-1*ONE_WEEK], label="actual", linewidth=2.0)
+        ax.plot(np.arange(0,len(y_preds[-2*ONE_WEEK:-1*ONE_WEEK])),y_preds[-2*ONE_WEEK:-1*ONE_WEEK],label="prediction", linewidth=2.0)
         cv = cross_val_score(model, X, y, cv=tscv, scoring="neg_mean_squared_error")
         deviation = np.sqrt(cv.std())
         scale=1
         lower = y_preds[-2*ONE_WEEK:-1*ONE_WEEK] - (scale * deviation)
         upper = y_preds[-2*ONE_WEEK:-1*ONE_WEEK] + (scale * deviation)
-        plt.plot(lower, "r--", label="upper bond / lower bond", alpha=0.5)
-        plt.plot(upper, "r--", alpha=0.5)
-        plt.show()
+        #ax.plot(lower, "r--", label="upper bond / lower bond", alpha=0.5)
+        #ax.plot(upper, "r--", alpha=0.5)
     return (y_preds,y_tests,algo_time)
 
 def evaluate_model_b(df,model,size):
@@ -65,20 +67,22 @@ def do_all(dfs,columns, models,names,rolling_columns,windows,step,size,max_train
             y_tests_per_model = np.append(y_tests_per_model,y_tests)
             time_per_model = time_per_model + algo_time
         
-        score_per_model = mean_squared_error(y_preds_per_model,y_tests_per_model)
+        score_per_model = mean_absolute_error(y_preds_per_model,y_tests_per_model)
         time_per_model = time_per_model / len(dfs)
         predictions = y_preds_per_model
         expected = y_tests_per_model
         
         forecast_errors = [expected[i]-predictions[i] for i in range(len(expected))]
         bias = sum(forecast_errors) * 1.0/len(expected)
-        nps = np.array([name,np.sqrt(score_per_model),bias,time_per_model/len(dfs)])
+        nps = np.array([name,score_per_model,bias,time_per_model/len(dfs)])
         print(nps)
         scores.append(nps)
         
 def naive(dfs,max_train_size):
     sum_mse = 0
     sum_time = 0
+    fig, ax = plt.subplots(len(dfs),1,figsize=(20,10))
+    fig.suptitle('Előrejelzés naiv modellel', fontsize=16)
     for i in range(len(dfs)):
         df = dfs[i][:max_train_size].copy()
         start_time = time.time()
@@ -89,11 +93,16 @@ def naive(dfs,max_train_size):
         forecast_errors = [expected[i]-predictions[i] for i in range(len(expected))]
         bias = sum(forecast_errors) * 1.0/len(expected)
         print('Bias: %f' % bias)
-        sum_mse = sum_mse + mean_squared_error(y_pred[24:],y_test[24:])
+        sum_mse = sum_mse + mean_absolute_error(y_pred[24:],y_test[24:])
         sum_time = sum_time + (time.time()-start_time)
-        print("Model:\t{0}\n\tZone:\t{1}\n\tEVA:\t{2}\n\tTime\t{3}\n".format("Naive Model", i+1, np.sqrt(mean_squared_error(y_pred[24:],y_test[24:])),time.time()-start_time))
+        print("Model:\t{0}\n\tZone:\t{1}\n\tEVA:\t{2}\n\tTime\t{3}\n".format("Naive Model", i+1, mean_squared_error(y_pred[24:],y_test[24:]),time.time()-start_time))
         print(sum_mse/3)
         print(sum_time/3)
+        ax[i].plot(np.arange(0,len(y_test[-2*ONE_WEEK:-1*ONE_WEEK])),y_test[-2*ONE_WEEK:-1*ONE_WEEK], label="actual", linewidth=2.0)
+        ax[i].plot(np.arange(0,len(y_pred[-2*ONE_WEEK:-1*ONE_WEEK])),y_pred[-2*ONE_WEEK:-1*ONE_WEEK], label="prediction", linewidth=2.0)
+        ax[i].set_title('{0}. Zóna'.format(i))
+        ax[i].legend(['Valós','Predikció'])
+        
         
 def fft(df,max_train_size,plot_size):
     start_time = time.time()
